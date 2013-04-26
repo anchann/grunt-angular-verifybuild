@@ -32,7 +32,7 @@ module.exports = function(grunt) {
 	};
 
 
-	grunt.registerTask('angular_verifybuild', 'Verify integrity of build artifacts for a yeoman angular project', function() {
+	grunt.registerTask('verifybuild', 'Verify integrity of build artifacts for a yeoman angular project', function() {
 		var defaultOptions = {
 			exist: [
 				'index.html',
