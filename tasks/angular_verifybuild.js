@@ -78,6 +78,7 @@ module.exports = function(grunt) {
 
 		grunt.util._.each(options.revvedRefs, function(refs, filename) {
 			var revvedFilename = getRevvedFilename(options.dist + '/' + filename);
+			var isContentRevved = revvedFilename !== undefined;
 
 			if (revvedFilename === undefined) {
 				// allow both revved and normal filenames
@@ -90,14 +91,28 @@ module.exports = function(grunt) {
 
 			var content = grunt.file.read(revvedFilename);
 			grunt.util._.each(refs, function(ref) {
-				var revvedRefPath = getRevvedFilename(options.dist + '/' + ref);
+				var revvedRefPath = getRevvedFilename(options.dist + (ref.charAt(0) === '/' ? '' : '/') + ref);
 				if (revvedRefPath === undefined) {
 					grunt.log.error('revvedRef: no revved version of ' + ref + ' found.');
 					return;
 				}
 
 				var revvedRefFilename = revvedRefPath.split('/').pop();
-				if (new RegExp(revvedRefFilename.replace('.', '\\.')).test(content)) {
+				var searchTerm = revvedRefFilename.replace(/\./g, '\\.');
+				if (options.hostUrl !== undefined) {
+					// we expect the hostUrl to be prepended if the original reference
+					// was root-relative, or is it wasn't but the content file is not a revved file
+					if (ref.charAt(0) === '/' || !isContentRevved) {
+						searchTerm = options.hostUrl.replace(/\./g, '\\.') + '[^"\'\\(\\)]*' + searchTerm;
+					}
+				}
+
+				var startChars = ['\'', '"', '\\('];
+				// the escaped quote is used in templates.js
+				var endChars   = ['\'', '"', '\\)', '\\\\"'];
+
+				var regex = '(' + startChars.join('|') + ')' + searchTerm + '(' + endChars.join('|') + ')';
+				if (new RegExp(regex).test(content)) {
 					grunt.log.ok('revvedRef: ' + revvedFilename + '    -->     ' + revvedRefFilename);
 				}
 				else {

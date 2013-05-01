@@ -39,6 +39,7 @@ In your project's Gruntfile, add a section named `verifybuild` to the data objec
 grunt.initConfig({
   verifybuild: {
     options: {
+      hostUrl: "//cdn.domain.com",
       exist: [
         'index.html',
       ],
@@ -67,6 +68,13 @@ grunt.initConfig({
 
 ### Options
 
+#### options.hostUrl
+Type: `String`
+Default value: `undefined`
+
+If you provide `hostUrl` for the usemin task, provide one here too.
+
+
 #### options.dist
 Type: `String`
 Default value: `grunt.config('yeoman').dist` || `''`
@@ -93,9 +101,17 @@ Default value: `{'index.html' : ['scripts/scripts.js', 'scripts/templates.js', '
 
 For each key : refs, a possibly revved file key must contain at least one textual reference to the revved
 names of each file in refs. So the text of `index.html` had better contain `0132abcd.scripts.js`,
-`0132abcd.templates.js`, and `0132abcd.styles.css`. Yes, only the last part of the path is used in the matching.
-This should be reasonably safe, because revved filenames have a content-based hash in the name, and are thus
-fairly unique. If this proves to be a problem, we'll fix at that time.
+`0132abcd.templates.js`, and `0132abcd.styles.css`. Furthermore, refs that match the following properties
+are expected to be prepended with hostUrl if one was specified:
+
+* all root-relative revved assets
+* non-root-relative revved assets in non-revved files
+
+So if you have a hostUrl defined and have a leading slash in any of your refs, those will always be checked
+with hostUrl prepended. Furthermore, if your filename is _not_ revved, inside it any refs that _do not_ start
+with a leading slash will be expected to have the hostUrl prepended.
+
+This behaviour is necessary to ensure that all statis assets are served statically.
 
 
 ## TODO
