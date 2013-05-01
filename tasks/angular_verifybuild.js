@@ -98,12 +98,12 @@ module.exports = function(grunt) {
 				}
 
 				var revvedRefFilename = revvedRefPath.split('/').pop();
-				var searchTerm = revvedRefFilename.replace(/\./g, '\\.');
+				var searchTerm = '[^"\'\\(\\)]*' + revvedRefFilename.replace(/\./g, '\\.');
 				if (options.hostUrl !== undefined) {
 					// we expect the hostUrl to be prepended if the original reference
 					// was root-relative, or is it wasn't but the content file is not a revved file
 					if (ref.charAt(0) === '/' || !isContentRevved) {
-						searchTerm = options.hostUrl.replace(/\./g, '\\.') + '[^"\'\\(\\)]*' + searchTerm;
+						searchTerm = options.hostUrl.replace(/\./g, '\\.') + searchTerm;
 					}
 				}
 
